@@ -36,3 +36,17 @@ class PowerSupply:
             print(colored(hline))
         #r = self.s.measure(ch = siglent.CHANNEL.CH1, parameter = siglent.PARAMETER.VOLTAGE)
         #print(r)
+        #
+    def power_down(self, channel):
+        assert channel in self.channels, "Selected channel does not exist"
+        self.s.output(self.channels[channel], siglent.STATE.OFF)
+
+    def power_up(self, channel):
+        assert channel in self.channels, "Selected channel does not exist"
+        self.s.output(self.channels[channel], siglent.STATE.ON)
+
+    def cycle(self, channel=None):
+        print(f"Turning OFF channel {channel}.")
+        self.power_down(channel)
+        print(f"Turning ON channel {channel}.")
+        self.power_up(channel)
