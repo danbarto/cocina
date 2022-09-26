@@ -3,7 +3,9 @@ Tools for an automated lab
 
 Setup:
 
-`git clone --recursive git@github.com:danbarto/cocina.git`
+``` shell
+git clone --recursive git@github.com:danbarto/cocina.git
+```
 
 `source setup.sh` sets all the necessary paths.
 
@@ -19,7 +21,7 @@ Configured IP to 192.168.2.1 for RB supplies, 192.168.2.2 for emulators, subnet 
 
 `ps1.monitor()` shows the current status of PS1 (RB supply).
 
-`ps1.cycle('ch2')` power cycles channel 2 (combination of `power_up('ch2')` and `power_up('ch2')`)
+`ps1.cycle('ch2')` power cycles channel 2 (combination of `power_down('ch2')` and `power_up('ch2')`)
 
 
 ## Setting parameters
