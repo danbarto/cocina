@@ -19,7 +19,8 @@ setup(
     version='0.1.0',
     description="Wrapper for the Sigilent Power Supply API",
     url="https://github.com/danbarto/cocina/",
-    packages=find_packages(exclude=["docs", "tests*", "examples"]),
+    #packages=find_packages(exclude=["docs", "tests*", "examples"]),
+    packages=find_packages(),
     install_requires=install_requires,
     dependency_links=dependency_links,
 )
