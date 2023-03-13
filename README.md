@@ -25,3 +25,7 @@ Configured IP to 192.168.2.1 for RB supplies, 192.168.2.2 for emulators, subnet 
 ## Setting parameters
 
 No high level functionality for setting output voltage / current limit is implemented yet.
+
+## Troubleshooting
+
+If UTF encoding is not working properly please set `export PYTHONIOENCODING=utf8`.
