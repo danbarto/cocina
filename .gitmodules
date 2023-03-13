@@ -1,3 +1,0 @@
-[submodule "siglent_psu_api"]
-	path = siglent_psu_api
-	url = https://github.com/Kurokesu/siglent_psu_api.git

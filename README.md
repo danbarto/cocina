@@ -1,13 +1,11 @@
 # cocina
 Tools for an automated lab
 
-Setup:
+Install:
 
 ``` shell
-git clone --recursive git@github.com:danbarto/cocina.git
+pip install git+https://github.com/danbarto/cocina.git
 ```
-
-`source setup.sh` sets all the necessary paths.
 
 ## BU setup
 
@@ -15,7 +13,7 @@ Two Sigilent SPD3303X-E connected to the same switch, subnet 192.168.X.X
 
 Configured IP to 192.168.2.1 for RB supplies, 192.168.2.2 for emulators, subnet mask 255.255.0.0
 
-`lab.py` instantiates the power supplies and prints current status.
+`lab.py` is an example for how to instantiate the power supplies and print current status.
 
 ## Basic monitoring
 
