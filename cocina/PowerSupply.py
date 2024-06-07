@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+#
+# User manual: https://siglentna.com/wp-content/uploads/dlm_uploads/2022/11/SPD3303X_QuickStart_E02A.pdf
+#
 import socket
 import time
 
@@ -18,7 +21,8 @@ class PowerSupply:
         self.name   = name
         self.ip     = ip
         self.port   = port
-        self.channels = ['CH1', 'CH2']  # CH3 is not working
+        self.channels = ['CH1', 'CH2', 'CH3']
+        self.mon_channels = ['CH1', 'CH2'] # CH3 not working
         self.timeout = timeout
         self.connect()
         self.id()
@@ -49,6 +53,7 @@ class PowerSupply:
         return None
 
     def id(self):
+        # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
         res = self.send('*IDN?'.encode('utf-8'), read=True).split(',')
         self.model = res[1]
         self.sn = res[2]
@@ -64,7 +69,7 @@ class PowerSupply:
         parameter = parameter.upper()
         channel = channel.upper()
         assert parameter in ['VOLTAGE', 'CURRENT', 'POWER'], f"Don't know what to do with parameter {parameter}"
-        assert channel in self.channels, f"Don't know what to do with channel {channel}"
+        assert channel in self.mon_channels, f"Don't know what to do with channel {channel}"
 
         cmd = f"MEASURE:{parameter}? {channel}".encode("utf-8")
         return float(self.send(cmd, read=True))
@@ -74,13 +79,13 @@ class PowerSupply:
         status = self.status()
 
         res = {}
-        for channel in self.channels:
+        for channel in self.mon_channels:
             res[channel] = {}
             res[channel]['Voltage'] = self.measure(channel = channel, parameter = 'VOLTAGE')
             res[channel]['Current'] = self.measure(channel = channel, parameter = 'CURRENT')
 
 
-        for channel in self.channels:
+        for channel in self.mon_channels:
             if getattr(self, channel) == 1: colored = green
             elif getattr(self, channel) == 0: colored = red
             print(colored(topline))

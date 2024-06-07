@@ -9,17 +9,32 @@ pip install git+https://github.com/danbarto/cocina.git
 
 ## BU setup
 
-Two Sigilent SPD3303X-E connected to the same switch, subnet 192.168.X.X
+Several Sigilent SPD3303X-E connected to the same switch, subnet 192.168.X.X, with subnet mask 255.255.0.0
 
-Configured IP to 192.168.2.1 for RB supplies, 192.168.2.2 for emulators, subnet mask 255.255.0.0
-
-`lab.py` is an example for how to instantiate the power supplies and print current status.
+`lab.py` shows an example for how to instantiate the power supplies and print current status.
 
 ## Basic monitoring
 
-`ps1.monitor()` shows the current status of PS1 (RB supply).
+Load the package and instantiate a Power Supply with a name and IP address.
 
-`ps1.cycle('ch2')` power cycles channel 2 (combination of `power_down('ch2')` and `power_up('ch2')`)
+``` python
+from cocina import PowerSupply
+psu = PowerSupply("My favorite PSU", "192.168.2.1")
+```
+
+A nice print out of the current state of the power supply can be obtained using
+``` python
+ psu.monitor()
+```
+
+Measuring the volgate (in Volt), current (in Ampere) or power (in Watt) on one of the channels using `measure()`, example:
+
+``` python
+psu.measure('ch2', 'power')
+```
+
+
+`psu.cycle('ch2')` power cycles channel 2 (combination of `psu.power_down('ch2')` and `psu.power_up('ch2')`)
 
 
 ## Setting parameters
