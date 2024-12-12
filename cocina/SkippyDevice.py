@@ -10,6 +10,14 @@ import socket
 
 class SkippyDevice():
     def __init__(self, ip: str, port: int, name: str = ""):
+        '''
+        Initialize a SCPI device
+
+        Parameters:
+            ip (str): IP Address of the device
+            port (int): port to use for SCPI connection
+            name (str): arbitrary name used for the python instance of the device
+        '''
 
         self.name       = name
         self.ip         = ip
@@ -24,8 +32,10 @@ class SkippyDevice():
     def connect(self) -> bool:
         '''
         ZeroMQ based connection
+
+        Returns:
+            bool: True for a successful connection
         '''
-        #self.dev = "mock"
         with self.lock:
             context = zmq.Context()
             self.dev = context.socket(zmq.REQ)
@@ -37,6 +47,15 @@ class SkippyDevice():
             return False
 
     def send(self, msg: str) -> str:
+        '''
+        Send a message to the device
+
+        Parameters:
+            msg (str): The message to be sent to the device
+
+        Returns:
+            str: Response from the device
+        '''
         if not self.dev:
             self.connect()
         self.dev.send_string(msg)
@@ -44,6 +63,9 @@ class SkippyDevice():
         return res
 
     def close(self):
+        '''
+        Close the connection to the device
+        '''
         with self.lock:
             self.dev.close()
             self.dev = None
