@@ -6,21 +6,20 @@ import socket
 import time
 
 from .colors import green, red, yellow, dummy
+from .SkippyDevice import SkippyDevice
 
 topline = "┏━" + "━"*20 + "━┓"
 botline = "┗━" + "━"*20 + "━┛"
 
-class PowerSupply:
+class PowerSupply(SkippyDevice):
     def __init__(self,
-                 name,
                  ip,
                  port=5025,
+                 name="PSU",
                  timeout=1,
                  ):
 
-        self.name   = name
-        self.ip     = ip
-        self.port   = port
+        super().__init__(ip, port, name)
         self.channels = ['CH1', 'CH2', 'CH3']
         self.mon_channels = ['CH1', 'CH2'] # CH3 not working
         self.timeout = timeout
@@ -28,40 +27,21 @@ class PowerSupply:
         self.id()
         self.status()
 
-    def connect(self):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.settimeout(self.timeout)
-        self.s.connect((self.ip, self.port))
-
-    def send(self, cmd, timeout=2, read=False):
-        starttime = time.time()
-        while True:
-            try:
-                self.s.sendall(cmd)
-                if read:
-                    reply = self.s.recv(4096).decode('utf-8').strip()
-                    return reply
-                else:
-                    return True
-            except socket.error:
-                time.sleep(0.01)
-                self.s.close()
-                self.connect()
-                if time.time() - starttime > timeout:
-                    print ("Send command timed out")
-                    break
-        return None
-
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
-        res = self.send('*IDN?'.encode('utf-8'), read=True).split(',')
-        self.model = res[1]
-        self.sn = res[2]
-        self.firmware = res[3]
-        self.hardware = res[4]
+        res = self.send('*IDN?').split(',')
+        try:
+            self.model = res[1]
+            self.sn = res[2]
+            self.firmware = res[3]
+            self.hardware = res[4]
+        except IndexError:
+            self.model = "Default"
+
 
     def status(self):
-        res = int(self.send('SYSTEM:STATUS?'.encode('utf-8'), read=True), 16)
+        res = int(self.send('SYSTEM:STATUS?'))
+        #res = int(self.send('SYSTEM:STATUS?'.encode('utf-8'), read=True), 16)
         self.CH1 = (res >> 4) & 0x1
         self.CH2 = (res >> 5) & 0x1
 
@@ -71,8 +51,8 @@ class PowerSupply:
         assert parameter in ['VOLTAGE', 'CURRENT', 'POWER'], f"Don't know what to do with parameter {parameter}"
         assert channel in self.mon_channels, f"Don't know what to do with channel {channel}"
 
-        cmd = f"MEASURE:{parameter}? {channel}".encode("utf-8")
-        return float(self.send(cmd, read=True))
+        cmd = f"MEASURE:{parameter}? {channel}"
+        return float(self.send(cmd))
 
     def monitor(self):
 
@@ -96,11 +76,11 @@ class PowerSupply:
 
     def power_down(self, channel):
         assert channel.upper() in self.channels, "Selected channel does not exist"
-        self.send(f"OUTPUT {channel.upper()},OFF".encode('utf-8'))
+        self.send(f"OUTPUT {channel.upper()},OFF")
 
     def power_up(self, channel):
         assert channel.upper() in self.channels, "Selected channel does not exist"
-        self.send(f"OUTPUT {channel.upper()},ON".encode('utf-8'))
+        self.send(f"OUTPUT {channel.upper()},ON")
 
     def cycle(self, channel=None, wait=2):
         print(f"Turning OFF channel {channel}.")
