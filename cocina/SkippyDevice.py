@@ -58,7 +58,7 @@ class SkippyDevice():
         '''
         if not self.dev:
             self.connect()
-        self.dev.send_string(msg)
+        self.dev.send_string(msg, zmq.NOBLOCK)
         res = self.dev.recv().decode("utf-8")
         return res
 
