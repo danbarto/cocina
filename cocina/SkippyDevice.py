@@ -27,6 +27,7 @@ class SkippyDevice():
         self.logger     = logging.getLogger(__name__)
         self.lock       = threading.Lock()
 
+        print("Connect")
         self.connect()
 
     def connect(self) -> bool:

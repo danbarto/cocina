@@ -23,8 +23,11 @@ class PowerSupply(SkippyDevice):
         self.channels = ['CH1', 'CH2', 'CH3']
         self.mon_channels = ['CH1', 'CH2'] # CH3 not working
         self.timeout = timeout
+        print("Connect 2")
         self.connect()
+        print("ID")
         self.id()
+        print("Status")
         self.status()
 
     def id(self):
