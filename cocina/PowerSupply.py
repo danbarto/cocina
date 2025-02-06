@@ -13,21 +13,18 @@ botline = "┗━" + "━"*20 + "━┛"
 
 class PowerSupply(SkippyDevice):
     def __init__(self,
+                 name,
                  ip,
                  port=5025,
-                 name="PSU",
                  timeout=1,
                  ):
 
-        super().__init__(ip, port, name)
+        super().__init__(ip, port, name, timeout)
         self.channels = ['CH1', 'CH2', 'CH3']
         self.mon_channels = ['CH1', 'CH2'] # CH3 not working
         self.timeout = timeout
-        print("Connect 2")
         self.connect()
-        print("ID")
         self.id()
-        print("Status")
         self.status()
 
     def id(self):
@@ -43,7 +40,7 @@ class PowerSupply(SkippyDevice):
 
 
     def status(self):
-        res = int(self.send('SYSTEM:STATUS?'))
+        res = int(self.send('SYSTEM:STATUS?'), 16)
         #res = int(self.send('SYSTEM:STATUS?'.encode('utf-8'), read=True), 16)
         self.CH1 = (res >> 4) & 0x1
         self.CH2 = (res >> 5) & 0x1
@@ -79,11 +76,11 @@ class PowerSupply(SkippyDevice):
 
     def power_down(self, channel):
         assert channel.upper() in self.channels, "Selected channel does not exist"
-        self.send(f"OUTPUT {channel.upper()},OFF")
+        self.send(f"OUTPUT {channel.upper()},OFF", read=False)
 
     def power_up(self, channel):
         assert channel.upper() in self.channels, "Selected channel does not exist"
-        self.send(f"OUTPUT {channel.upper()},ON")
+        self.send(f"OUTPUT {channel.upper()},ON", read=False)
 
     def cycle(self, channel=None, wait=2):
         print(f"Turning OFF channel {channel}.")
