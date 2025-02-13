@@ -29,7 +29,7 @@ class PowerSupply(SkippyDevice):
 
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
-        res = self.send('*IDN?').split(',')
+        res = self.query('*IDN?').split(',')
         try:
             self.model = res[1]
             self.sn = res[2]
@@ -40,8 +40,7 @@ class PowerSupply(SkippyDevice):
 
 
     def status(self):
-        res = int(self.send('SYSTEM:STATUS?'), 16)
-        #res = int(self.send('SYSTEM:STATUS?'.encode('utf-8'), read=True), 16)
+        res = int(self.query('SYSTEM:STATUS?'), 16)
         self.CH1 = (res >> 4) & 0x1
         self.CH2 = (res >> 5) & 0x1
 
@@ -52,7 +51,7 @@ class PowerSupply(SkippyDevice):
         assert channel in self.mon_channels, f"Don't know what to do with channel {channel}"
 
         cmd = f"MEASURE:{parameter}? {channel}"
-        return float(self.send(cmd))
+        return float(self.query(cmd))
 
     def monitor(self):
 
@@ -76,11 +75,11 @@ class PowerSupply(SkippyDevice):
 
     def power_down(self, channel):
         assert channel.upper() in self.channels, "Selected channel does not exist"
-        self.send(f"OUTPUT {channel.upper()},OFF", read=False)
+        self.send(f"OUTPUT {channel.upper()},OFF")
 
     def power_up(self, channel):
         assert channel.upper() in self.channels, "Selected channel does not exist"
-        self.send(f"OUTPUT {channel.upper()},ON", read=False)
+        self.send(f"OUTPUT {channel.upper()},ON")
 
     def cycle(self, channel=None, wait=2):
         print(f"Turning OFF channel {channel}.")

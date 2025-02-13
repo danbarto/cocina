@@ -29,29 +29,30 @@ class WaveFormGenerator(SkippyDevice):
         self.channels = ['CH1', 'CH2']
         self.timeout = timeout
         self.connect()
-        print(self.dev.recv(4096).decode('utf-8'))
+        _ = self.read()
+        #print(self.dev.recv(4096).decode('utf-8'))
         self.id()
         #self.status()
 
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
-        res = self.send('*IDN?', read=True).split(',')
+        res = self.query('*IDN?').split(',')
         self.model = res[1]
         #self.sn = res[2]
         self.firmware = res[3]
         self.hardware = res[2]
 
     def get_ip(self):
-        res = self.send('SYST:COMM:LAN:IPAD?', read=True)
+        res = self.query('SYST:COMM:LAN:IPAD?')
         print(res)
 
     def set_wave(self):
         '''
         This function is a stub.
         '''
-        self.send('C1:BSWV WVTP,SINE', read=True)
-        self.send('C1:BSWV FRQ,2500', read=True)
-        self.send('C1:BSWV AMP,2.1', read=True)
+        self.send('C1:BSWV WVTP,SINE')
+        self.send('C1:BSWV FRQ,2500')
+        self.send('C1:BSWV AMP,2.1')
 
     def set_pulse(self,
                   channel: int=1,
@@ -138,13 +139,13 @@ class WaveFormGenerator(SkippyDevice):
             self.send(f'C{channel}:OUTP OFF')
 
     def status(self):
-        res = int(self.send('SYSTEM:STATUS?', read=True))
+        res = int(self.query('SYSTEM:STATUS?'))
         #print(res)
         #self.CH1 = (res >> 4) & 0x1
         #self.CH2 = (res >> 5) & 0x1
         
     def reset(self):
-        res = self.send('*RST', read=False)
+        res = self.send('*RST')
         if res:
             print("Device has been reset")
 
