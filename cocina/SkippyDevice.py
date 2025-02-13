@@ -19,7 +19,7 @@ class SkippyDevice():
             port (int): port to use for SCPI connection
             name (str): arbitrary name used for the python instance of the device
             timeout (int): timeout of socket transaction in seconds
-            wait (int): wait time between send and receive
+            wait (int): wait time between after sending a message
         '''
 
         self.name       = name
@@ -36,7 +36,7 @@ class SkippyDevice():
 
     def connect(self) -> bool:
         '''
-        ZeroMQ based connection
+        Socket based connection
 
         Returns:
             bool: True for a successful connection
@@ -54,30 +54,44 @@ class SkippyDevice():
         else:
             return False
 
-    def send(self, msg: str, read: bool=True) -> str:
+    def send(self, msg: str):
         '''
         Send a message to the device
 
         Parameters:
             msg (str): The message to be sent to the device
-            read (bool): Read back reply
-            wait (int): wait time between send and receive
+        '''
+        if not self.dev:
+            self.connect()
+        self.dev.sendall(f"{msg}\n".encode('utf-8'))
+        if self.wait>0:
+            time.sleep(self.wait)
 
+    def read(self) -> str:
+        '''
+        Read response from the device
 
         Returns:
             str: Response from the device
         '''
         if not self.dev:
             self.connect()
-        self.dev.sendall(msg.encode('utf-8'))
-        if self.wait>0:
-            time.sleep(self.wait)
-        if read:
-            res = self.dev.recv(4096).decode("utf-8").strip()
-            return res
-        else:
-            return ""
+        res = self.dev.recv(4096).decode("utf-8").strip()
+        return res
 
+    def query(self, msg:str) -> str:
+        '''
+        Submit a query to the device
+
+        Parameters:
+            msg (str): The message to be sent to the device
+
+        Returns:
+            str: Response from the device
+        '''
+        self.send(msg)
+        return self.read()
+    
     def close(self):
         '''
         Close the connection to the device
