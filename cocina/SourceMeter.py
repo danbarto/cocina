@@ -6,8 +6,6 @@
 # If observe error -285, change command language to SCPI (from TSP)
 import socket
 import time
-#import pyvisa as visa
-from pymeasure.instruments.keithley import Keithley2450 as Keithley
 
 from .colors import green, red, yellow, dummy
 from .SkippyDevice import SkippyDevice
@@ -17,20 +15,19 @@ botline = "┗━" + "━"*20 + "━┛"
 
 '''
 # pyvisa version
+import pyvisa as visa
 rm = visa.ResourceManager()
 smu = rm.open_resource("TCPIP::192.168.0.77::INSTR")
 smu.write("*IDN?")
 print(smu.read())
-
 '''
 
 '''
 # pymeasure version
+from pymeasure.instruments.keithley import Keithley2450 as Keithley
 smu = Keithley("TCPIP::192.168.0.77::INSTR")
-
-
+smu.id
 '''
-
 
 class SourceMeter(SkippyDevice):
     def __init__(self,
@@ -51,12 +48,12 @@ class SourceMeter(SkippyDevice):
         res = self.query('*IDN?').split(',')
         #print(res)
 
-    def measeure(self):
+    def measure(self):
         self.query(":MEAS:CURR?")
 
-    def set_mode(self):
+    def set_mode_voltage(self, v_range: int=20):
         self.send(":SOURCE:FUNCTION VOLT")
-        smu.send(":SOURCE:VOLT:RANGE 200")
+        self.send(f":SOURCE:VOLT:RANGE {v_range}")
 
     def enable(self):
         '''
@@ -91,4 +88,4 @@ class SourceMeter(SkippyDevice):
             freq (int): Frequency of the beep
             dur (int): Duration in seconds
         '''
-        self.send(f":SYST:BEEP {freq},{dur}")
+        self.send(f":SYST:BEEP {freq}, {dur}")
