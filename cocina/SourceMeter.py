@@ -40,32 +40,71 @@ class SourceMeter(SkippyDevice):
 
         super().__init__(ip, port, name, timeout, wait)
         self.timeout = timeout
-        self.connect()
         self.id()
+        self.mode="V"
 
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
         res = self.query('*IDN?').split(',')
-        #print(res)
+        try:
+            self.manufacturer = res[0]
+            self.model = res[1]
+            self.sn = res[2]
+            self.firmware = res[3]
+        except IndexError:
+            self.model = "Default"
 
     def measure(self):
-        self.query(":MEAS:CURR?")
+        return float(self.query(":MEAS:CURR?"))
 
-    def set_mode_voltage(self, v_range: int=20):
+    def set_mode_voltage(self,
+                         v_range: float=20,
+                         voltage: float=0,
+                         i_max: float=0.00005,
+                         i_range: float=0.000105,
+                         ):
+        assert i_max<i_range, "Current limit is larger than range. Aborting."
+        assert voltage < v_range, "Voltage is larger than voltage range. Aborting."
+        self.send(':SENS:FUNC "CURR"')
+        self.send(f":SENS:CURR:RANGE {i_range}")
+        self.send(f":SOURCE:VOLT:ILIMIT {i_max}")
         self.send(":SOURCE:FUNCTION VOLT")
+        self.send(f":SOURCE:VOLT 0")
         self.send(f":SOURCE:VOLT:RANGE {v_range}")
+        self.send(f":SOURCE:VOLT {voltage}")
+        self.mode="V"
+        self.measure()
+
+    def set_voltage(self,
+                    voltage: float=0,
+                    ):
+        if self.mode=="V":
+            self.send(f":SOURCE:VOLT {voltage}")
+        self.measure()
+
+    def get_voltage(self):
+        return float(self.query(":SOURCE:VOLT?"))
+
+    def is_tripped(self):
+        if self.mode == "V":
+            return self.query(":SOURCE:VOLT:ILIMIT:TRIP?") == "1"
+        elif self.mode == "I":
+            return self.query(":SOURCE:CURR:VLIMIT:TRIP?") == "1"
+
 
     def enable(self):
         '''
         Enable the output
         '''
         self.send(":OUTP ON")
+        self.measure()
 
     def disable(self):
         '''
         Disable the output
         '''
         self.send(":OUTP OFF")
+        self.measure()
 
     def set_front_term(self):
         '''
@@ -79,9 +118,9 @@ class SourceMeter(SkippyDevice):
         ON - TRUE
         OFF - FALSE
         '''
-        return self.query(":OUTP:STATE?")=="ON"
+        return self.query(":OUTP:STATE?")=="1"
     
-    def beep(self, freq: int=200, dur: int=1):
+    def beep(self, freq: int=2000, dur: float=1):
         '''
         Sound a beep on the instrument
         Parameters:
