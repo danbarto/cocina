@@ -23,7 +23,6 @@ class PowerSupply(SkippyDevice):
         self.channels = ['CH1', 'CH2', 'CH3']
         self.mon_channels = ['CH1', 'CH2'] # CH3 not working
         self.timeout = timeout
-        self.connect()
         self.id()
         self.status()
 
@@ -87,3 +86,9 @@ class PowerSupply(SkippyDevice):
         time.sleep(wait)
         print(f"Turning ON channel {channel}.")
         self.power_up(channel)
+
+    def set_voltage(self, channel, value):
+        self.send(f"{channel}:VOLT {value}")
+
+    def set_current(self, channel, value):
+        self.send(f"{channel}:CURR {value}")
