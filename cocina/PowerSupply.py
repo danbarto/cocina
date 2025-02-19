@@ -2,7 +2,6 @@
 #
 # User manual: https://siglentna.com/wp-content/uploads/dlm_uploads/2022/11/SPD3303X_QuickStart_E02A.pdf
 #
-import socket
 import time
 
 from .colors import green, red, yellow, dummy

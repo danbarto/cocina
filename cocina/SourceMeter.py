@@ -4,9 +4,6 @@
 #
 # Example https://github.com/tektronix/keithley/blob/main/Instrument_Examples/DAQ6510/Scanning_Low_Level_DC_Voltage/DAQ6510_Scanning_Low_Level_DC_Voltage_SCPI.py
 # If observe error -285, change command language to SCPI (from TSP)
-import socket
-import time
-
 from .colors import green, red, yellow, dummy
 from .SkippyDevice import SkippyDevice
 

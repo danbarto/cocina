@@ -4,9 +4,6 @@
 # Programming guide: https://siglentna.com/wp-content/uploads/dlm_uploads/2024/06/SDG_Programming-Guide_PG02-E05C.pdf
 # (bad) socket example hinting at necessary wait times between send and receive, as well as port 5024 instead of 5025:
 # https://www.siglenteu.com/application-note/programming-example-using-python-to-configure-a-basic-waveform-with-an-sdg-x-series-generator-via-open-sockets-lan/
-import socket
-import time
-
 from .SkippyDevice import SkippyDevice
 from .colors import green, red, yellow, dummy
 
