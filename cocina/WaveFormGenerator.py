@@ -28,7 +28,6 @@ class WaveFormGenerator(SkippyDevice):
         self.port   = port
         self.channels = ['CH1', 'CH2']
         self.timeout = timeout
-        self.connect()
         _ = self.read()
         #print(self.dev.recv(4096).decode('utf-8'))
         self.id()
@@ -147,6 +146,6 @@ class WaveFormGenerator(SkippyDevice):
     def reset(self):
         res = self.send('*RST')
         if res:
-            print("Device has been reset")
+            self.logger.info(f"{self.lstr}: Device has been reset")
 
 
