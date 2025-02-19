@@ -32,6 +32,8 @@ class SkippyDevice():
         self.logger     = logging.getLogger(__name__)
         self.lock       = threading.Lock()
 
+        self.lstr = f"{self.name} @ {self.ip}:{self.port}"
+
         self.connect()
 
     def connect(self) -> bool:
@@ -48,7 +50,8 @@ class SkippyDevice():
             #context = zmq.Context()
             #self.dev = context.socket(zmq.REQ)
             #self.dev.connect(f"tcp://{self.ip}:{self.port}")
-            self.logger.info(f"Connected to SCPI Device {self.name} @ {self.ip}:{self.port}")
+            self.logger.info(f"{self.lstr}: Connected to SCPI Device")
+            
         if self.dev:
             return True
         else:
@@ -61,11 +64,14 @@ class SkippyDevice():
         Parameters:
             msg (str): The message to be sent to the device
         '''
-        if not self.dev:
-            self.connect()
-        self.dev.sendall(f"{msg}\n".encode('utf-8'))
-        if self.wait>0:
-            time.sleep(self.wait)
+        with self.lock:
+            if not self.dev:
+                self.logger.debug(f"{self.lstr}: Reconnecting")
+                self.connect()
+            self.logger.debug(f"{self.lstr}: Sending message: {msg}")
+            self.dev.sendall(f"{msg}\n".encode('utf-8'))
+            if self.wait>0:
+                time.sleep(self.wait)
 
     def read(self) -> str:
         '''
@@ -74,10 +80,14 @@ class SkippyDevice():
         Returns:
             str: Response from the device
         '''
-        if not self.dev:
-            self.connect()
-        res = self.dev.recv(4096).decode("utf-8").strip()
-        return res
+        with self.lock:
+            if not self.dev:
+                self.logger.debug(f"{self.lstr}: Reconnecting")
+                self.connect()
+            self.logger.debug(f"{self.lstr}: Reading message.")
+            res = self.dev.recv(4096).decode("utf-8").strip()
+            self.logger.debug(f"{self.lstr}: Received message: {res}")
+            return res
 
     def query(self, msg:str) -> str:
         '''
@@ -97,6 +107,7 @@ class SkippyDevice():
         Close the connection to the device
         '''
         with self.lock:
+            self.logger.info(f"{self.lstr}: Closing Connection.")
             self.dev.close()
             self.dev = None
-            self.logger.info(f"Connection to SCPI Device {self.name} @ {self.ip}:{self.port} closed.")
+            self.logger.info(f"{self.lstr}: Connection to SCPI Device closed.")
