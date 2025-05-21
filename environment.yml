@@ -2,5 +2,4 @@ name: cocina_env
 channels:
   - defaults
 dependencies:
-  - scipy=2.1.0
-  - pip=22.0.2
+  - numpy=2.1.0
