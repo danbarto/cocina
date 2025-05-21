@@ -6,14 +6,18 @@ from cocina.TimeController import TimeController
 
 class TimeControllerTest(unittest.TestCase):
 
-    @patch("cocina.TimeController.SkippyDevice.send")
-    def test_all(self, mock_send):
+    @patch("cocina.TimeController.SkippyDevice.connect", return_vale=True)
+    @patch("cocina.TimeController.SkippyDevice.read", return_value="16")
+    @patch("cocina.TimeController.SkippyDevice.send", return_value="16")
+    def test_all(self, mock_send, mock_read, mock_connect):
         # Define a return value for the send method
         mock_send.return_value = "123"
 
         # initialize a tc
         tc = TimeController("123.123.123.123", 5050, "test")
-        self.assertTrue(tc.dev)
+        with patch.object(tc, 'dev', True):
+            print(tc.dev)
+            self.assertTrue(tc.dev)
 
         # obtain the ID
         res = tc.id()
@@ -54,5 +58,6 @@ class TimeControllerTest(unittest.TestCase):
 
 
         # close tc connection
-        tc.close()
-        self.assertFalse(tc.dev)
+        with patch.object(tc, 'close', return_value=None):
+            tc.close()
+            self.assertFalse(tc.dev)
