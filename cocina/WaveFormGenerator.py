@@ -96,7 +96,7 @@ class WaveFormGenerator(SkippyDevice):
         '''
         assert trigger in ['MAN', 'EXT', 'INT'], f"Don't know trigger mode {trigger}"
         self.send(f'C{channel}:BTWV STATE,ON')
-        self.send(f'C{channel}:BTWV PRD,{period}')
+        #self.send(f'C{channel}:BTWV PRD,{period}')
         self.send(f'C{channel}:BTWV TRSR,{trigger}')
         self.send(f'C{channel}:BTWV TIME,{cycles}')
 

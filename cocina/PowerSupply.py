@@ -22,8 +22,11 @@ class PowerSupply(SkippyDevice):
         self.channels = ['CH1', 'CH2', 'CH3']
         self.mon_channels = ['CH1', 'CH2'] # CH3 not working
         self.timeout = timeout
-        self.id()
-        self.status()
+        try:
+            self.id()
+            self.status()
+        except:
+            print("Couldn't query ID or status")
 
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"

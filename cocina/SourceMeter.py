@@ -7,6 +7,8 @@
 from .colors import green, red, yellow, dummy
 from .SkippyDevice import SkippyDevice
 
+import numpy as np
+
 topline = "┏━" + "━"*20 + "━┓"
 botline = "┗━" + "━"*20 + "━┛"
 
@@ -32,13 +34,14 @@ class SourceMeter(SkippyDevice):
                  ip,
                  port=5025,
                  timeout=1,
-                 wait=0.5,
+                 wait=0.01,
                  ):
 
         super().__init__(ip, port, name, timeout, wait)
         self.timeout = timeout
         self.id()
         self.mode="V"
+        self.buffers = []
 
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
@@ -60,7 +63,7 @@ class SourceMeter(SkippyDevice):
                          i_max: float=0.00005,
                          i_range: float=0.000105,
                          ):
-        assert i_max<i_range, "Current limit is larger than range. Aborting."
+        assert i_max<i_range, f"Current limit {i_max} is larger than range {i_range}. Aborting."
         assert voltage < v_range, "Voltage is larger than voltage range. Aborting."
         self.send(':SENS:FUNC "CURR"')
         self.send(f":SENS:CURR:RANGE {i_range}")
@@ -72,12 +75,42 @@ class SourceMeter(SkippyDevice):
         self.mode="V"
         self.measure()
 
+    def set_current_range(self,
+                          i_range: float = 0.000105,
+                          i_max:   float = 0.00005,
+                          ):
+        assert i_max<i_range, f"Current limit {i_max} is larger than range {i_range}. Aborting."
+        self.write(":SENS:CURR:RANGE", i_range, strict=False)
+        self.write(":SOURCE:VOLT:ILIMIT", i_max, strict=False)
+        self.measure()
+
     def set_voltage(self,
                     voltage: float=0,
                     ):
         if self.mode=="V":
             self.send(f":SOURCE:VOLT {voltage}")
         self.measure()
+
+    def averaged_current(self,
+                         count: int = 10,
+                         voltage: float = 0,
+                         ):
+        '''
+        NOTE: WIP
+        This function should check if the used buffer already exists.
+        '''
+        buffer_name = 'ivbuffer'
+        if not buffer_name in self.buffers:
+            self.send(f'TRACe:MAKE "{buffer_name}", {count}')
+            self.buffers.append(buffer_name)
+            print(self.buffers)
+        self.send(f'TRIGger:LOAD "SimpleLoop", {count}, 0, "{buffer_name}"')
+        self.send(f"SOURCE:VOLT {voltage}")
+        self.send("INIT")
+        self.send("*WAI")
+        res = np.fromstring(self.query(f'TRAC:DATA? 1, {count}, "{buffer_name}", READ, SOUR, REL'), sep=",")
+
+        return res[::3], res[1::3], res[2::3]  # current, voltage, timestamp
 
     def get_voltage(self):
         return float(self.query(":SOURCE:VOLT?"))
@@ -105,7 +138,7 @@ class SourceMeter(SkippyDevice):
 
     def set_front_term(self):
         '''
-        Select fron terminal
+        Select front terminal
         '''
         self.send(":ROUT:TERM FRON")
 

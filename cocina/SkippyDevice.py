@@ -7,6 +7,7 @@ import logging
 import threading
 import time
 import socket
+import numpy as np
 
 class SkippyDevice():
     def __init__(self, ip: str, port: int, name: str = "", timeout: int = 1, wait: int = 0):
@@ -102,6 +103,37 @@ class SkippyDevice():
         self.send(msg)
         return self.read()
     
+    def write(self, cmd, value, strict=True) -> bool:
+        '''
+        Function that treats messages without values as commands.
+        This is the safe way to write to a device, making sure that transactions were successful.
+        NOTE tested, but comparison is very strict.
+
+        Parameters:
+            cmd (str): The command to send (i.e., message without the value to write)
+            value (any): The value to write
+            strict (bool): If true, raise a ValueError if readback does not agree with value
+
+        Returns:
+            bool: True if write and readback agree, False otherwise.
+        '''
+        self.logger.debug(f"{self.lstr}: Writing {value} to {cmd}.")
+        self.send(f"{cmd} {value}")
+        res = self.query(f"{cmd}?")
+        try:
+            comp = np.isclose(float(res), float(value))
+        except ValueError:
+            # if return value is not a number, compare the strings
+            comp = (res == str(value))
+        if comp:
+            self.logger.debug(f"{self.lstr}: Write successful.")
+            return True
+        else:
+            self.logger.debug(f"{self.lstr}: Writing to {cmd} was not successful. Expected {value}, but got {res}.")
+            if strict:
+                raise ValueError(f"Writing to {cmd} was not successful. Expected {value}, but got {res}.")
+            return False
+
     def close(self):
         '''
         Close the connection to the device
