@@ -2,9 +2,9 @@
 '''
 Simple class for IDQ Time Tagger
 '''
-from .SkippyDevice import SkippyDevice
+from .ZeroMQDevice import ZeroMQDevice
 
-class TimeController(SkippyDevice):
+class TimeController(ZeroMQDevice):
     def __init__(self,
                  name,
                  ip: str,
@@ -22,7 +22,7 @@ class TimeController(SkippyDevice):
         '''
 
         super().__init__(ip, port, name, timeout, wait)
-        self.id()
+        #self.id()
         self.dark = False
 
 
@@ -37,7 +37,7 @@ class TimeController(SkippyDevice):
             str: the full ID string returned from the device
         '''
         cmd = "*IDN?"
-        res = self.send(cmd)
+        res = self.query(cmd)
         # do something with the returned ID here
         return res
 
@@ -49,7 +49,7 @@ class TimeController(SkippyDevice):
         '''
         on_str = "OFF" if on else "ON"
         cmd = f"DEVICE:LEDS {on_str}"
-        self.send(cmd)
+        res = self.query(cmd)
         self.dark = on
 
     def config_clock(self, ch: int, period: int, count: int=-1, pw: int=0):
@@ -69,7 +69,7 @@ class TimeController(SkippyDevice):
             count = "INF"
         cmd = f"GEN{ch}:enable ON;PNUM {count};PPER {period};PWID {pw}"
         setattr(self, f"GEN{ch}", 1)
-        self.send(cmd)
+        self.query(cmd)
 
     #def config_pulse(self, ch: int, period: int, count: int, pw: int, delay: int=0):
     #    cmd = f"GEN{ch}:enable ON;PNUM {count};PPER {period};PWID {pw}"
@@ -112,3 +112,14 @@ class TimeController(SkippyDevice):
             delay (int): Delay in [ps] wrt the trigger
         '''
         self.send(f"GEN{ch1}:TRIG:DELAY {delay}")
+
+    def config_input(self,
+                     channel: int,
+                     threshold: float=0.4,
+                     ):
+        res = self.query(f"INPU{channel}:ENAB")
+        res = self.query(f"INPU:THRESHOLD {threshold}")
+
+    def get_counter(self, channel: int):
+        res = self.query(f"INPU{channel}:COUN?")
+        return int(res)
