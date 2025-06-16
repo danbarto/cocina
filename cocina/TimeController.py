@@ -5,7 +5,13 @@ Simple class for IDQ Time Tagger
 from .SkippyDevice import SkippyDevice
 
 class TimeController(SkippyDevice):
-    def __init__(self, ip: str, port: int, name: str = ""):
+    def __init__(self,
+                 name,
+                 ip: str,
+                 port: int,
+                 timeout: int=1,
+                 wait: float=0.01,
+                 ):
         '''
         Initialize the TimeController
 
@@ -15,7 +21,7 @@ class TimeController(SkippyDevice):
             name (str): arbitrary name of the device
         '''
 
-        super().__init__(ip, port, name)
+        super().__init__(ip, port, name, timeout, wait)
         self.id()
         self.dark = False
 
