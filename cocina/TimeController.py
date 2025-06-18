@@ -194,8 +194,9 @@ class TimeController(ZeroMQDevice):
             threshold (float): Discriminator threshold in V
             int_time (int): Integration time for counter in ms
         '''
-        _ = self.query(f"INPU{channel}:ENAB;THRESHOLD {threshold};COUN:INTE {int_time}")
-        #_ = self.query(f"INPU:THRESHOLD {threshold}")
+        _ = self.query(f"INPU{channel}:ENAB")
+        _ = self.query(f"INPU{channel}:THRESHOLD {threshold}")
+        _ = self.query(f"INPU{channel}:COUN:INTE {int_time}")
 
     def get_counter(self, channel: int):
         '''
