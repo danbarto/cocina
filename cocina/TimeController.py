@@ -97,12 +97,11 @@ class TimeController(ZeroMQDevice):
         '''
         if link<0:
             link = "NONE"
-        cmd = f"GEN{ch}:ENAB ON;PNUM {count};PPER {period};PWID {pw};TRIG:DELAY {delay};LINK GEN{link};ARM {arm}"
+        cmd = f"GEN{ch}:ENAB ON;PNUM {count};PPER {period};PWID {pw};TRIG:DELAY {delay};LINK GEN{link};ARM {mode}"
         _ = self.query(cmd)
 
     def config_combiner(self,
                         ch: int,
-                        count: int,
                         delay: int = 0,
                         link: int = -1,
                         ):
@@ -111,7 +110,6 @@ class TimeController(ZeroMQDevice):
 
         Parameters:
             ch (int): Channel number
-            count (int): number of pulses
             delay (int): delay in ps
             link (int): other generator block to link to
         '''
@@ -133,10 +131,16 @@ class TimeController(ZeroMQDevice):
                       delay: int = 0,
                       link: int = -1,
                       mode: str = "TTL",
-                      )
+                      ):
         enab_str = "ON" if enab else "OFF"
         cmd = f"OUTP{ch}:ENAB {enab_str};LINK TSC{link};MODE {mode};PULSE OFF;DELAY {delay}"
         _ = self.query(cmd)
+
+    def arm_trigger(self, ch:int):
+        '''
+        Arm the triger
+        '''
+        _ = self.query(f"GEN{ch}:TRIG:ARM")
 
     def play(self, ch: int):
         '''
@@ -250,4 +254,8 @@ if __name__ == '__main__':
     tc.config_output(ch=3, link=9)
     tc.config_output(ch=4, link=10)  # make copies of the signal
 
+    tc.arm_trigger(ch=3)
     tc.play(ch=3)
+
+    # to disable
+    tc.stop(1)
