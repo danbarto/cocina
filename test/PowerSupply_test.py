@@ -7,9 +7,9 @@ from cocina.PowerSupply import PowerSupply
 
 class MyTestCase(unittest.TestCase):
 
-    @patch("cocina.TimeController.SkippyDevice.connect", return_vale=True)
-    @patch("cocina.TimeController.SkippyDevice.read", return_value="16")
-    @patch("cocina.TimeController.SkippyDevice.send", return_value="16")
+    @patch("cocina.SourceMeter.SkippyDevice.connect", return_vale=True)
+    @patch("cocina.SourceMeter.SkippyDevice.read", return_value="16")
+    @patch("cocina.SourceMeter.SkippyDevice.send", return_value="16")
     def test_all(self, mock_send, mock_read, mock_connect):
         # Define a return value for the send method
         #mock_read.return_value = "16"
