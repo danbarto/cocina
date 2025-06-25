@@ -54,6 +54,7 @@ class TimeController(ZeroMQDevice):
         cmd = f"DEVICE:LEDS {on_str}"
         res = self.query(cmd)
         self.dark = on
+        return res
 
     def config_clock(self, ch: int, period: int, count: int=-1, pw: int=0):
         '''
@@ -97,8 +98,11 @@ class TimeController(ZeroMQDevice):
         '''
         if link<0:
             link = "NONE"
-        cmd = f"GEN{ch}:ENAB ON;PNUM {count};PPER {period};PWID {pw};TRIG:DELAY {delay};LINK GEN{link};ARM {mode}"
-        _ = self.query(cmd)
+        else:
+            link = f"GEN{link}"
+        cmd = f"GEN{ch}:ENAB ON;PNUM {count};PPER {period};PWID {pw};TRIG:DELAY {delay};LINK {link};ARM:MODE {mode}"
+        res = self.query(cmd)
+        return res
 
     def config_combiner(self,
                         ch: int,
@@ -115,15 +119,18 @@ class TimeController(ZeroMQDevice):
         '''
         if link<0:
             link = "NONE"
+        else:
+            link = f"GEN{link}"
         cmds = [
             f"TSCO{ch}:WIND:ENAB OFF;BEGI:DELA 0;EDGE RISI;LINK NONE;",
             f"TSCO{ch}:WIND:END:DELA 0;EDGE FALL;LINK NONE;",
-            f"TSCO{ch}:FIR:LINK GEN{link};",
+            f"TSCO{ch}:FIR:LINK {link};",
             f"TSCO{ch}:SEC:LINK NONE;",
             f"TSCO{ch}:OPIN ONLYFIR;OPOU ONLYFIR;COUN:INTE 1000;MODE CYCL",
         ]
         cmd = ":".join(cmds)
-        _ = self.query(cmd)
+        res = self.query(cmd)
+        return res
 
     def config_output(self,
                       ch: int,
@@ -133,8 +140,13 @@ class TimeController(ZeroMQDevice):
                       mode: str = "TTL",
                       ):
         enab_str = "ON" if enab else "OFF"
-        cmd = f"OUTP{ch}:ENAB {enab_str};LINK TSC{link};MODE {mode};PULSE OFF;DELAY {delay}"
-        _ = self.query(cmd)
+        if link<0:
+            link = "NONE"
+        else:
+            link = f"TSC{link}"
+        cmd = f"OUTP{ch}:ENAB {enab_str};LINK {link};MODE {mode};PULSE OFF;DELAY {delay}"
+        res = self.query(cmd)
+        return res
 
     def arm_trigger(self, ch:int):
         '''
@@ -252,8 +264,8 @@ if __name__ == '__main__':
 
     tc.config_output(ch=1, link=9)
     tc.config_output(ch=2, link=10)
-    tc.config_output(ch=3, link=9)
-    tc.config_output(ch=4, link=10)  # make copies of the signal
+    #tc.config_output(ch=3, link=9)
+    #tc.config_output(ch=4, link=10)  # make copies of the signal
 
     tc.arm_trigger(ch=3)
     tc.play(ch=3)
