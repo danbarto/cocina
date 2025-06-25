@@ -6,9 +6,9 @@ from cocina.TimeController import TimeController
 
 class TimeControllerTest(unittest.TestCase):
 
-    @patch("cocina.TimeController.SkippyDevice.connect", return_vale=True)
-    @patch("cocina.TimeController.SkippyDevice.read", return_value="16")
-    @patch("cocina.TimeController.SkippyDevice.send", return_value="16")
+    @patch("cocina.ZMQDummy.ZeroMQDevice.connect", return_vale=True)
+    @patch("cocina.ZMQDummy.ZeroMQDevice.read", return_value="123")
+    @patch("cocina.ZMQDummy.ZeroMQDevice.send", return_value="123")
     def test_all(self, mock_send, mock_read, mock_connect):
         # Define a return value for the send method
         mock_send.return_value = "123"
