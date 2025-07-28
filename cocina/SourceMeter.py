@@ -6,6 +6,7 @@
 # If observe error -285, change command language to SCPI (from TSP)
 from .colors import green, red, yellow, dummy
 from .SkippyDevice import SkippyDevice
+from .GlobalLock import GlobalLock
 
 import numpy as np
 
@@ -37,6 +38,7 @@ class SourceMeter(SkippyDevice):
                  wait=0.01,
                  ):
 
+        # NOTE not sure if this needs locking
         super().__init__(ip, port, name, timeout, wait)
         self.timeout = timeout
         self.id()
@@ -44,18 +46,20 @@ class SourceMeter(SkippyDevice):
         self.buffers = []
 
     def id(self):
-        # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
-        res = self.query('*IDN?').split(',')
-        try:
-            self.manufacturer = res[0]
-            self.model = res[1]
-            self.sn = res[2]
-            self.firmware = res[3]
-        except IndexError:
-            self.model = "Default"
+        with GlobalLock(self.ip):
+            # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
+            res = self.query('*IDN?').split(',')
+            try:
+                self.manufacturer = res[0]
+                self.model = res[1]
+                self.sn = res[2]
+                self.firmware = res[3]
+            except IndexError:
+                self.model = "Default"
 
     def measure(self):
-        return float(self.query(":MEAS:CURR?"))
+        with GlobalLock(self.ip):
+            return float(self.query(":MEAS:CURR?"))
 
     def set_mode_voltage(self,
                          v_range: float=20,
