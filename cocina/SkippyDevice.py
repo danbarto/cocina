@@ -47,6 +47,7 @@ class SkippyDevice():
         with self.lock:
             self.dev = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.dev.settimeout(self.timeout)
+            #self.dev.setblocking(0)
             self.dev.connect((self.ip, self.port))
             #context = zmq.Context()
             #self.dev = context.socket(zmq.REQ)
@@ -73,6 +74,7 @@ class SkippyDevice():
             self.dev.sendall(f"{msg}\n".encode('utf-8'))
             if self.wait>0:
                 time.sleep(self.wait)
+            #self.close()
 
     def read(self) -> str:
         '''
@@ -88,7 +90,9 @@ class SkippyDevice():
             self.logger.debug(f"{self.lstr}: Reading message.")
             res = self.dev.recv(4096).decode("utf-8").strip()
             self.logger.debug(f"{self.lstr}: Received message: {res}")
+            #self.close()
             return res
+
 
     def query(self, msg:str) -> str:
         '''
@@ -101,7 +105,9 @@ class SkippyDevice():
             str: Response from the device
         '''
         self.send(msg)
-        return self.read()
+        res = self.read()
+        #self.close()
+        return res
     
     def write(self, cmd, value, strict=True) -> bool:
         '''

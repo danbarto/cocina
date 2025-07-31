@@ -5,15 +5,15 @@ import time
 import errno
 
 class GlobalLock:
-    def __init__(self, name, timeout=30):
+    def __init__(self, name, key=False, timeout=30):
         self.timeout = timeout
         self.filename = f'/tmp/{name}_lock'
-        self.have_key = False  # indicates that the instance has obtained the key
+        self.have_key = key  # indicates that the instance has obtained the key
 
     def __enter__(self):
         first_timeout = False
         start_time = time.time()
-        while not self.have_key :
+        while not self.have_key:
             #print("Waiting for lock")
             try:
                 f = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
@@ -21,6 +21,7 @@ class GlobalLock:
                 self.have_key = True
             except OSError as e:
                 if e.errno == errno.EEXIST:  # Failed as the file already exists.
+                    print("Locked")
                     time.sleep(0.1)
                 else:  # Something unexpected went wrong
                     raise
@@ -36,4 +37,8 @@ class GlobalLock:
                     raise
 
     def __exit__(self, exc_type, exc_value, traceback):
-        os.remove(self.filename)
+        try:
+            os.remove(self.filename)
+        except OSError:
+            print("Tried to delete key but didn't exist")
+            pass
