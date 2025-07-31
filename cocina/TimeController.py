@@ -3,6 +3,7 @@
 Simple class for IDQ Time Tagger
 '''
 from .ZeroMQDevice import ZeroMQDevice
+from .GlobalLock import GlobalLock
 
 def s_to_ps(time):
     return int(time*1e12)
@@ -24,10 +25,10 @@ class TimeController(ZeroMQDevice):
             port (int): port that is used on the device
             name (str): arbitrary name of the device
         '''
-
-        super().__init__(ip, port, name, timeout, wait)
-        #self.id()
-        self.dark = False
+        self.ip = ip
+        with GlobalLock(self.ip):
+            super().__init__(ip, port, name, timeout, wait)
+            self.dark = False
 
     def id(self) -> str:
         '''
@@ -39,10 +40,11 @@ class TimeController(ZeroMQDevice):
         Return:
             str: the full ID string returned from the device
         '''
-        cmd = "*IDN?"
-        res = self.query(cmd)
-        # do something with the returned ID here
-        return res
+        with GlobalLock(self.ip):
+            cmd = "*IDN?"
+            res = self.query(cmd)
+            # do something with the returned ID here
+            return res
 
     def dark_mode(self, on: bool = True):
         '''
@@ -50,11 +52,12 @@ class TimeController(ZeroMQDevice):
         Parameter:
             on (bool): turn the dark mode on (LEDs off)
         '''
-        on_str = "OFF" if on else "ON"
-        cmd = f"DEVICE:LEDS {on_str}"
-        res = self.query(cmd)
-        self.dark = on
-        return res
+        with GlobalLock(self.ip):
+            on_str = "OFF" if on else "ON"
+            cmd = f"DEVICE:LEDS {on_str}"
+            res = self.query(cmd)
+            self.dark = on
+            return res
 
     def config_clock(self, ch: int, period: int, count: int=-1, pw: int=0):
         '''
@@ -67,13 +70,14 @@ class TimeController(ZeroMQDevice):
             pw (int): pulse width of the clock pulse in [ps]
 
         '''
-        if pw == 0:
-            pw = period/2
-        if count < 0:
-            count = "INF"
-        cmd = f"GEN{ch}:enable ON;PNUM {count};PPER {period};PWID {pw}"
-        setattr(self, f"GEN{ch}", 1)
-        self.query(cmd)
+        with GlobalLock(self.ip):
+            if pw == 0:
+                pw = period/2
+            if count < 0:
+                count = "INF"
+            cmd = f"GEN{ch}:enable ON;PNUM {count};PPER {period};PWID {pw}"
+            setattr(self, f"GEN{ch}", 1)
+            self.query(cmd)
 
     def config_generator(self,
                          ch: int,
@@ -96,13 +100,14 @@ class TimeController(ZeroMQDevice):
             link (int): other generator block to link to
             mode (str): mode AUTO or MANU
         '''
-        if link<0:
-            link = "NONE"
-        else:
-            link = f"GEN{link}"
-        cmd = f"GEN{ch}:ENAB ON;PNUM {count};PPER {period};PWID {pw};TRIG:DELAY {delay};LINK {link};ARM:MODE {mode}"
-        res = self.query(cmd)
-        return res
+        with GlobalLock(self.ip):
+            if link<0:
+                link = "NONE"
+            else:
+                link = f"GEN{link}"
+            cmd = f"GEN{ch}:ENAB ON;PNUM {count};PPER {period};PWID {pw};TRIG:DELAY {delay};LINK {link};ARM:MODE {mode}"
+            res = self.query(cmd)
+            return res
 
     def config_combiner(self,
                         ch: int,
@@ -117,20 +122,21 @@ class TimeController(ZeroMQDevice):
             delay (int): delay in ps
             link (int): other generator block to link to
         '''
-        if link<0:
-            link = "NONE"
-        else:
-            link = f"GEN{link}"
-        cmds = [
-            f"TSCO{ch}:WIND:ENAB OFF;BEGI:DELA 0;EDGE RISI;LINK NONE;",
-            f"TSCO{ch}:WIND:END:DELA 0;EDGE FALL;LINK NONE;",
-            f"TSCO{ch}:FIR:LINK {link};",
-            f"TSCO{ch}:SEC:LINK NONE;",
-            f"TSCO{ch}:OPIN ONLYFIR;OPOU ONLYFIR;COUN:INTE 1000;MODE CYCL",
-        ]
-        cmd = ":".join(cmds)
-        res = self.query(cmd)
-        return res
+        with GlobalLock(self.ip):
+            if link<0:
+                link = "NONE"
+            else:
+                link = f"GEN{link}"
+            cmds = [
+                f"TSCO{ch}:WIND:ENAB OFF;BEGI:DELA 0;EDGE RISI;LINK NONE;",
+                f"TSCO{ch}:WIND:END:DELA 0;EDGE FALL;LINK NONE;",
+                f"TSCO{ch}:FIR:LINK {link};",
+                f"TSCO{ch}:SEC:LINK NONE;",
+                f"TSCO{ch}:OPIN ONLYFIR;OPOU ONLYFIR;COUN:INTE 1000;MODE CYCL",
+            ]
+            cmd = ":".join(cmds)
+            res = self.query(cmd)
+            return res
 
     def config_output(self,
                       ch: int,
@@ -139,20 +145,22 @@ class TimeController(ZeroMQDevice):
                       link: int = -1,
                       mode: str = "TTL",
                       ):
-        enab_str = "ON" if enab else "OFF"
-        if link<0:
-            link = "NONE"
-        else:
-            link = f"TSC{link}"
-        cmd = f"OUTP{ch}:ENAB {enab_str};LINK {link};MODE {mode};PULSE OFF;DELAY {delay}"
-        res = self.query(cmd)
-        return res
+        with GlobalLock(self.ip):
+            enab_str = "ON" if enab else "OFF"
+            if link<0:
+                link = "NONE"
+            else:
+                link = f"TSC{link}"
+            cmd = f"OUTP{ch}:ENAB {enab_str};LINK {link};MODE {mode};PULSE OFF;DELAY {delay}"
+            res = self.query(cmd)
+            return res
 
     def arm_trigger(self, ch:int):
         '''
         Arm the triger
         '''
-        _ = self.query(f"GEN{ch}:TRIG:ARM")
+        with GlobalLock(self.ip):
+            _ = self.query(f"GEN{ch}:TRIG:ARM")
 
     def play(self, ch: int):
         '''
@@ -161,8 +169,8 @@ class TimeController(ZeroMQDevice):
         Parameters:
             ch (int): Channel number
         '''
-
-        self.query(f"GEN{ch}:PLAY")
+        with GlobalLock(self.ip):
+            self.query(f"GEN{ch}:PLAY")
 
     def stop(self, ch: int):
         '''
@@ -171,7 +179,8 @@ class TimeController(ZeroMQDevice):
         Parameters:
             ch (int): Channel number
         '''
-        self.query(f"GEN{ch}:STOP")
+        with GlobalLock(self.ip):
+            self.query(f"GEN{ch}:STOP")
 
     def link(self, ch1: int, ch2: int):
         '''
@@ -181,7 +190,8 @@ class TimeController(ZeroMQDevice):
             ch1 (int): Channel 1 (main)
             ch2 (int): Channel 2 (servant)
         '''
-        self.query(f"GEN{ch1}:TRIG:LINK GEN{ch2}")
+        with GlobalLock(self.ip):
+            self.query(f"GEN{ch1}:TRIG:LINK GEN{ch2}")
 
     def delay(self, ch1: int, delay: int=0):
         '''
@@ -191,7 +201,8 @@ class TimeController(ZeroMQDevice):
             ch1 (int): Channel number
             delay (int): Delay in [ps] wrt the trigger
         '''
-        self.query(f"GEN{ch1}:TRIG:DELAY {delay}")
+        with GlobalLock(self.ip):
+            self.query(f"GEN{ch1}:TRIG:DELAY {delay}")
 
     def config_input(self,
                      channel: int,
@@ -206,9 +217,10 @@ class TimeController(ZeroMQDevice):
             threshold (float): Discriminator threshold in V
             int_time (int): Integration time for counter in ms
         '''
-        _ = self.query(f"INPU{channel}:ENAB")
-        _ = self.query(f"INPU{channel}:THRESHOLD {threshold}")
-        _ = self.query(f"INPU{channel}:COUN:INTE {int_time}")
+        with GlobalLock(self.ip):
+            _ = self.query(f"INPU{channel}:ENAB")
+            _ = self.query(f"INPU{channel}:THRESHOLD {threshold}")
+            _ = self.query(f"INPU{channel}:COUN:INTE {int_time}")
 
     def get_counter(self, channel: int):
         '''
@@ -217,8 +229,9 @@ class TimeController(ZeroMQDevice):
         Parameters:
             channel (int): Channel number
         '''
-        res = self.query(f"INPU{channel}:COUN?")
-        return int(res)
+        with GlobalLock(self.ip):
+            res = self.query(f"INPU{channel}:COUN?")
+            return int(res)
 
 
 if __name__ == '__main__':
