@@ -85,24 +85,3 @@ class I2C_Device():
         val_to_write = (val << shift) | (tmp & ~mask)
         self._write_address(adr, val_to_write)
 
-    # NOTE everything below is ADS specific
-
-    def set_default(self):
-        self.write("MODE", 0)
-        self.write("MUX", 0x4)
-
-    def get_gain(self):
-        return gain[self.read("PGA")]
-
-    def read_voltage(self):
-        res = self.read("CONV")
-        sign = (res & 0x8000) >> 15
-        val = res & 0x7FFF
-
-        if self.debug:
-            print(sign, val)
-        if sign == 1:
-            # negative voltage
-            return -(0x7FFF-val)*self.get_gain()/(2**15)
-        else:
-            return val*self.get_gain()/(2**15)
