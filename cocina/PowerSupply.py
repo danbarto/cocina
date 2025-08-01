@@ -49,6 +49,7 @@ class PowerSupply(SkippyDevice):
             except IndexError:
                 print("Unexpected ID", res)
                 self.model = "Default"
+                self.sn = '0.815'
 
     def status(self):
         with GlobalLock(self.ip, key=self.key):
