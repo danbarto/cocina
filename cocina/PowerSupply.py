@@ -33,8 +33,8 @@ class PowerSupply(SkippyDevice):
                 print("Couldn't query ID or status")
                 raise
             self.key=False
-            print(f"Connected to PSU@{self.ip}")
-            print(f" - ID: {self.model}, {self.sn}")
+            #print(f"Connected to PSU@{self.ip}")
+            #print(f" - ID: {self.model}, {self.sn}")
 
 
     def id(self):

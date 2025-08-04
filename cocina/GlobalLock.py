@@ -40,5 +40,5 @@ class GlobalLock:
         try:
             os.remove(self.filename)
         except OSError:
-            print("Tried to delete key but didn't exist")
+            #print("Tried to delete key but didn't exist")
             pass
