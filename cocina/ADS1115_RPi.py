@@ -2,6 +2,7 @@
 
 from smbus import SMBus
 import os
+import struct
 from yaml import load, dump
 from yaml import CLoader as Loader, CDumper as Dumper
 from .RPi_I2C_Device import I2C_Device
