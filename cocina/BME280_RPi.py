@@ -21,6 +21,7 @@ class BME280(I2C_Device):
         self.t_ready = False
         self.h_ready = False
         self.p_ready = False
+        self.set_default()
 
     def set_default(self):
         self.write("OSRS_T", 5)
