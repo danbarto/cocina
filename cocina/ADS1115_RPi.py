@@ -23,7 +23,7 @@ def load_yaml(f_in):
 gain = {
     0: 6.144,
     1: 4.096,
-    2: 2.048,
+    2: 2.048, # default
     3: 1.024,
     4: 0.512,
     5: 0.256,
@@ -52,13 +52,17 @@ class ADS(I2C_Device):
 
     def read_voltage(self):
         res = self.read("CONV")
-        sign = (res & 0x8000) >> 15
-        val = res & 0x7FFF
+        # convert to signed integer
+        val = struct.unpack(">h", int.to_bytes(res, 2))[0]
+        return val*self.get_gain()/(2**15)
 
-        if self.debug:
-            print(sign, val)
-        if sign == 1:
-            # negative voltage
-            return -(0x7FFF-val)*self.get_gain()/(2**15)
-        else:
-            return val*self.get_gain()/(2**15)
+class TempSensor(ADS):
+    def __init__(self):
+        super().__init__()
+        self.set_default()
+
+    def get_C(self):
+        v = self.read_voltage()
+        if v < 0.7:
+            return "OFF"
+        return round((v-1.1)/0.004,2)
