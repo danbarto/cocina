@@ -6,6 +6,7 @@ import time
 
 from .colors import green, red, yellow, dummy
 from .SkippyDevice import SkippyDevice
+from .GlobalLock import GlobalLock
 
 topline = "┏━" + "━"*20 + "━┓"
 botline = "┗━" + "━"*20 + "━┛"
@@ -18,41 +19,53 @@ class PowerSupply(SkippyDevice):
                  timeout=1,
                  ):
 
-        super().__init__(ip, port, name, timeout)
-        self.channels = ['CH1', 'CH2', 'CH3']
-        self.mon_channels = ['CH1', 'CH2'] # CH3 not working
-        self.timeout = timeout
-        try:
-            self.id()
-            self.status()
-        except:
-            print("Couldn't query ID or status")
+        self.key = False
+        with GlobalLock(ip, key=self.key):
+            super().__init__(ip, port, name, timeout)
+            self.channels = ['CH1', 'CH2', 'CH3']
+            self.mon_channels = ['CH1', 'CH2'] # CH3 not working
+            self.timeout = timeout
+            self.key = True
+            try:
+                self.id()
+                self.status()
+            except:
+                print("Couldn't query ID or status")
+                raise
+            self.key=False
+            #print(f"Connected to PSU@{self.ip}")
+            #print(f" - ID: {self.model}, {self.sn}")
+
 
     def id(self):
         # identical to "echo "*IDN?" | netcat -q 1 {IP} {PORT}"
-        res = self.query('*IDN?').split(',')
-        try:
-            self.model = res[1]
-            self.sn = res[2]
-            self.firmware = res[3]
-            self.hardware = res[4]
-        except IndexError:
-            self.model = "Default"
-
+        with GlobalLock(self.ip, key=self.key):
+            res = self.query('*IDN?').split(',')
+            try:
+                self.model = res[1]
+                self.sn = res[2]
+                self.firmware = res[3]
+                self.hardware = res[4]
+            except IndexError:
+                print("Unexpected ID", res)
+                self.model = "Default"
+                self.sn = '0.815'
 
     def status(self):
-        res = int(self.query('SYSTEM:STATUS?'), 16)
-        self.CH1 = (res >> 4) & 0x1
-        self.CH2 = (res >> 5) & 0x1
+        with GlobalLock(self.ip, key=self.key):
+            res = int(self.query('SYSTEM:STATUS?'), 16)
+            self.CH1 = (res >> 4) & 0x1
+            self.CH2 = (res >> 5) & 0x1
 
     def measure(self, channel='CH1', parameter='VOLTAGE'):
-        parameter = parameter.upper()
-        channel = channel.upper()
-        assert parameter in ['VOLTAGE', 'CURRENT', 'POWER'], f"Don't know what to do with parameter {parameter}"
-        assert channel in self.mon_channels, f"Don't know what to do with channel {channel}"
+        with GlobalLock(self.ip):
+            parameter = parameter.upper()
+            channel = channel.upper()
+            assert parameter in ['VOLTAGE', 'CURRENT', 'POWER'], f"Don't know what to do with parameter {parameter}"
+            assert channel in self.mon_channels, f"Don't know what to do with channel {channel}"
 
-        cmd = f"MEASURE:{parameter}? {channel}"
-        return float(self.query(cmd))
+            cmd = f"MEASURE:{parameter}? {channel}"
+            return float(self.query(cmd))
 
     def monitor(self):
 
@@ -90,7 +103,8 @@ class PowerSupply(SkippyDevice):
         self.power_up(channel)
 
     def set_voltage(self, channel, value):
-        self.send(f"{channel}:VOLT {value}")
+        with GlobalLock(self.ip):
+            self.send(f"{channel}:VOLT {value}")
 
     def set_current(self, channel, value):
         self.send(f"{channel}:CURR {value}")

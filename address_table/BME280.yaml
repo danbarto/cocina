@@ -1,0 +1,331 @@
+ID:
+    doc: 'Conversion register'
+    address: 0xD0
+    mask: 0xFF
+    default: 0x60
+
+
+HUM_LSB:
+    doc: "humidity lsb"
+    address: 0xFE
+    mask: 0xFF
+    default: 0x0
+
+HUM_MSB:
+    doc: "humidity msb"
+    address: 0xFD
+    mask: 0xFF
+    default: 0x80
+
+TEMP_XLSB:
+    doc: "temperature xlsb"
+    address: 0xFC
+    mask: 0xF0
+    default: 0x0
+
+TEMP_LSB:
+    doc: "temperature lsb"
+    address: 0xFB
+    mask: 0xFF
+    default: 0x0
+
+TEMP_MSB:
+    doc: "temperature msb"
+    address: 0xFA
+    mask: 0xFF
+    default: 0x80
+
+PRESS_XLSB:
+    doc: "pressure xlsb"
+    address: 0xF9
+    mask: 0xF0
+    default: 0x0
+
+PRESS_LSB:
+    doc: "pressure lsb"
+    address: 0xF8
+    mask: 0xFF
+    default: 0x0
+
+PRESS_MSB:
+    doc: "pressure msb"
+    address: 0xF7
+    mask: 0xFF
+    default: 0x80
+
+T_SB:
+    doc: "standby time in normal operation mode"
+    address: 0xF5
+    mask: 0xE0
+    default: 0x0
+
+FILTER:
+    doc: "low pass (IIR) filter"
+    address: 0xF5
+    mask: 0x1C
+    default: 0x0
+
+SPI3W_EN:
+    doc: "Enable SPI interface"
+    address: 0xF5
+    mask: 0x1
+    default: 0x0
+
+MODE:
+    doc: "Operation mode"
+    address: 0xF4
+    mask: 0x3
+    default: 0x0
+
+OSRS_P:
+    doc: "Oversampling rate for pressure"
+    address: 0xF4
+    mask: 0x1C
+    default: 0x0
+
+OSRS_T:
+    doc: "Oversampling rate for temperature"
+    address: 0xF4
+    mask: 0xE0
+    default: 0x0
+
+STATUS:
+    doc: "Status"
+    address: 0xF3
+    mask: 0x7
+    default: 0x0
+
+OSRS_H:
+    doc: "Oversampling rate for humidy"
+    address: 0xF2
+    mask: 0x7
+    default: 0x0
+
+
+DEF:
+    doc: ""
+    address: 0xFE
+    mask: 0x
+    default: 0x0
+
+T1_LSB:
+    doc: "T1 compensation LSB"
+    address: 0x88
+    mask: 0xFF
+    default: 0x0
+    type: H
+
+T1_MSB:
+    doc: "T1 compensation MSB"
+    address: 0x89
+    mask: 0xFF
+    default: 0x0
+    type: H
+
+T2_LSB:
+    doc: "T2 compensation LSB"
+    address: 0x8A
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+T2_MSB:
+    doc: "T2 compensation MSB"
+    address: 0x8B
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+T3_LSB:
+    doc: "T3 compensation LSB"
+    address: 0x8C
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+T3_MSB:
+    doc: "T3 compensation MSB"
+    address: 0x8D
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+H1:
+    doc: "H1 compensation"
+    address: 0xA1
+    mask: 0xFF
+    default: 0x0
+
+H2_LSB:
+    doc: "H1 compensation LSB"
+    address: 0xE1
+    mask: 0xFF
+    default: 0x0
+
+H2_MSB:
+    doc: "H2 compensation LSB"
+    address: 0xE2
+    mask: 0xFF
+    default: 0x0
+
+H3:
+    doc: "H3 compensation"
+    address: 0xE3
+    mask: 0xFF
+    default: 0x0
+
+H4_LSB:
+    doc: "H4 compensation LSB"
+    address: 0xE5
+    mask: 0xF
+    default: 0x0
+
+H4_MSB:
+    doc: "H4 compensation MSB"
+    address: 0xE4
+    mask: 0xFF
+    default: 0x0
+
+H5_LSB:
+    doc: "H5 compensation LSB"
+    address: 0xE5
+    mask: 0xF0
+    default: 0x0
+
+H5_MSB:
+    doc: "H5 compensation MSB"
+    address: 0xE6
+    mask: 0xFF
+    default: 0x0
+
+H6:
+    doc: "H6 compensation"
+    address: 0xE7
+    mask: 0xFF
+    default: 0x0
+
+P1_LSB:
+    doc: "P1 compensation LSB"
+    address: 0x8E
+    mask: 0xFF
+    default: 0x0
+    type: H
+
+P1_MSB:
+    doc: "P1 compensation MSB"
+    address: 0x8F
+    mask: 0xFF
+    default: 0x0
+    type: H
+
+P2_LSB:
+    doc: "P2 compensation LSB"
+    address: 0x90
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P2_MSB:
+    doc: "P2 compensation MSB"
+    address: 0x91
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P3_LSB:
+    doc: "P3 compensation LSB"
+    address: 0x92
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P3_MSB:
+    doc: "P3 compensation MSB"
+    address: 0x93
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P4_LSB:
+    doc: "P4 compensation LSB"
+    address: 0x94
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P4_MSB:
+    doc: "P4 compensation MSB"
+    address: 0x95
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P5_LSB:
+    doc: "P5 compensation LSB"
+    address: 0x96
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P5_MSB:
+    doc: "P5 compensation MSB"
+    address: 0x97
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P6_LSB:
+    doc: "P6 compensation LSB"
+    address: 0x98
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P6_MSB:
+    doc: "P6 compensation MSB"
+    address: 0x99
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P7_LSB:
+    doc: "P7 compensation LSB"
+    address: 0x9A
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P7_MSB:
+    doc: "P7 compensation MSB"
+    address: 0x9B
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P8_LSB:
+    doc: "P8 compensation LSB"
+    address: 0x9C
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P8_MSB:
+    doc: "P8 compensation MSB"
+    address: 0x9D
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P9_LSB:
+    doc: "P9 compensation LSB"
+    address: 0x9E
+    mask: 0xFF
+    default: 0x0
+    type: h
+
+P9_MSB:
+    doc: "P9 compensation MSB"
+    address: 0x9F
+    mask: 0xFF
+    default: 0x0
+    type: h
