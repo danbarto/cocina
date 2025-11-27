@@ -16,8 +16,8 @@ dependency_links = [
 
 setup(
     name='cocina',
-    version='1.0.0',
-    description="Wrapper for the Sigilent Power Supply API",
+    version='1.1.0',
+    description="Wrapper for the Sigilent Power Supply API and other SCPI instruments",
     url="https://github.com/danbarto/cocina/",
     #packages=find_packages(exclude=["docs", "tests*", "examples"]),
     packages=find_packages(),
