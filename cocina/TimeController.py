@@ -2,6 +2,7 @@
 '''
 Simple class for IDQ Time Tagger
 '''
+import time
 from .ZeroMQDevice import ZeroMQDevice
 from .GlobalLock import GlobalLock
 
@@ -159,6 +160,9 @@ class TimeController(ZeroMQDevice):
         '''
         Arm the triger
         '''
+        # not ideal, but give the TC some time before arming
+        # otherwise, sometimes config is not fully deployed
+        time.sleep(0.5)
         with GlobalLock(self.ip):
             _ = self.query(f"GEN{ch}:TRIG:ARM")
 
