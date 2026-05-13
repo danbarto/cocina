@@ -110,6 +110,15 @@ class TimeController(ZeroMQDevice):
             res = self.query(cmd)
             return res
 
+    def change_generator_par(self, ch:int, par: str="PWID", val: int=0):
+        '''
+        Change a given generator parameter, e.g. the pulse width, for a given generator / channel
+        '''
+        with GlobalLock(self.ip):
+            cmd = f"GEN{ch}:{par} {val}"
+            res = self.query(cmd)
+            return res
+
     def config_combiner(self,
                         ch: int,
                         delay: int = 0,

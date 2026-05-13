@@ -108,6 +108,23 @@ class WaveFormGenerator(SkippyDevice):
             self.send(f'C{channel}:BTWV TIME,{cycles}')
             self.send(f'C{channel}:BTWV DLAY,{delay}')
 
+    def change_burst_trig_src(self, channel: int=1, src: str='MAN'):
+        '''
+        Change the trigger source to INT, EXT or MAN
+        Parameters:
+            channel (int): select channel 1 or 2
+        '''
+        with GlobalLock(self.ip):
+            self.send(f'C{channel}:BTWV TRSR,{src}')
+
+    def change_pulse_width(self, channel: int=1, width: float=10e-9):
+        '''
+        Change the pulse width for a channel
+        Parameters:
+            channel (int): select channel 1 or 2
+        '''
+        with GlobalLock(self.ip):
+            self.send(f'C{channel}:BSWV WIDTH,{width}')
 
     def send_trigger(self, channel: int=1):
         '''
@@ -116,7 +133,12 @@ class WaveFormGenerator(SkippyDevice):
             channel (int): select channel 1 or 2
         '''
         with GlobalLock(self.ip):
+            # change trigger source to MAN so that we can actually send a trigger
+            self.send(f'C{channel}:BTWV TRSR,MAN')
+            # send the trigger cmd
             self.send(f'C{channel}:BTWV MTRIG')
+            ## change trigger source to INT so the channel does not trigger unexpectedly
+            # self.send(f'C{channel}:BTWV TRSR,EXT')
 
     def enable(self, channel: int=1, hiz: bool=True):
         '''
@@ -146,6 +168,9 @@ class WaveFormGenerator(SkippyDevice):
                 self.send(f'C{channel}:OUTP OFF')
 
     def invert(self, channel: int=1, off=False):
+        '''
+        Invert a channel
+        '''
         with GlobalLock(self.ip):
             if off:
                 self.send(f'C{channel}:INVT OFF')
