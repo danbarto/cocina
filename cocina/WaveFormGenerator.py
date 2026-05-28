@@ -91,6 +91,8 @@ class WaveFormGenerator(SkippyDevice):
                   trigger: str='MAN',
                   cycles: int=1,
                   delay: float=0.,
+                  rise: float=2e-9,
+                  fall: float=2e-9,
                   ):
         '''
         Set a channel into burst mode, with a defined number of cycles.
@@ -107,6 +109,8 @@ class WaveFormGenerator(SkippyDevice):
             self.send(f'C{channel}:BTWV TRSR,{trigger}')
             self.send(f'C{channel}:BTWV TIME,{cycles}')
             self.send(f'C{channel}:BTWV DLAY,{delay}')
+            self.send(f'C{channel}:BTWV CARR,RISE,{rise}')
+            self.send(f'C{channel}:BTWV CARR,FALL,{fall}')
 
     def change_burst_trig_src(self, channel: int=1, src: str='MAN'):
         '''
