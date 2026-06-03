@@ -121,6 +121,15 @@ class WaveFormGenerator(SkippyDevice):
         with GlobalLock(self.ip):
             self.send(f'C{channel}:BTWV TRSR,{src}')
 
+    def change_burst_cycles(self, channel: int=1, cycles: int=50):
+        '''
+        Change the trigger source to INT, EXT or MAN
+        Parameters:
+            channel (int): select channel 1 or 2
+        '''
+        with GlobalLock(self.ip):
+            self.send(f'C{channel}:BTWV TIME,{cycles}')
+
     def change_pulse_width(self, channel: int=1, width: float=10e-9):
         '''
         Change the pulse width for a channel

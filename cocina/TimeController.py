@@ -246,6 +246,62 @@ class TimeController(ZeroMQDevice):
             res = self.query(f"INPU{channel}:COUN?")
             return int(res)
 
+    def rec_play(self):
+        '''
+        Start data taking for a histogram
+        '''
+        with GlobalLock(self.ip):
+            _ = self.query(f"REC:PLAY")
+
+    def rec_stop(self):
+        '''
+        Stop data taking for a histogram
+        '''
+        with GlobalLock(self.ip):
+            _ = self.query(f"REC:STOP")
+
+    def set_histogram(self,
+                      hist: int=1,
+                      start: int=5,
+                      stop: int=5,
+                      minimum: int=0,
+                      bincount: int=15000,
+                      binwidth: int=20000,
+                      ):
+        '''
+        Configure a histogram
+        Time Stamp COmbiner 5 is connected by default: INPU1 --> DELA1 --> TSCO5
+        '''
+        with GlobalLock(self.ip):
+            _ = self.query(f"HIST{hist}:FLUSh")
+            _ = self.query(f"HIST{hist}:STOP:LINK TSCO{start}")
+            _ = self.query(f"HIST{hist}:REF:LINK TSCO{start}")
+            _ = self.query(f"HIST{hist}:MIN {minimum}")
+            _ = self.query(f"HIST{hist}:BCOU {bincount}")
+            _ = self.query(f"HIST{hist}:BWID {binwidth}")
+
+    def get_histogram(self):
+        with GlobalLock(self.ip):
+            res = self.query(f"HIST:DATA?")
+            return res
+
+    def build_histogram(self):
+        from yahist import Hist1D
+        import numpy as np
+        state = self.query("HIST1:STATE?")
+        xmin = int(state[state.find("MIN")+4:].split(";")[0])  # in ps
+        bwidth = int(state[state.find("BWID")+5:].split(";")[0])  # in ps
+        bcount = int(state[state.find("BCOUnt")+7:].split(";")[0])
+        xmax = bwidth * bcount
+        if xmax > 1e9: xmax=xmax/1e9
+        elif xmax > 1e6: xmax=xmax/1e6
+        elif xmax > 1e3: xmax=xmax/1e3
+        data = self.get_histogram()
+        data_ = eval(data)  # NOTE: dangerous, but I'm lazy
+        bins = f"{bcount},{xmin},{xmax}"
+        print(bins)
+        h1 = Hist1D.from_bincounts(data_, bins=np.linspace(xmin,xmax,bcount+1))
+        return h1
 
 if __name__ == '__main__':
 
